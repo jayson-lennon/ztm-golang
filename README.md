@@ -11,7 +11,7 @@ To view solutions for the exercises and projects, checkout the `solutions` branc
 The `solutions` branch also includes the code seen in the demos.
 
 ## Slides
-Offline copies of all the slides used in the course are available in the `slides` directory.
+Offline copies of all the slides used in the course are available for download [here](https://cdn.jayson.info/ztm/zerotomastery.io-golang-slides.zip).
 File names correspond to the titles of the lectures.
 
 ## Pixl
