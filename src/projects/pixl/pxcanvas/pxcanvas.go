@@ -23,6 +23,15 @@ type PxCanvas struct {
 	mouseState  PxCanvasMouseState
 	appState    *apptype.State
 	reloadImage bool
+	showMouse   bool
+}
+
+func (pxCanvas *PxCanvas) Cursor() desktop.Cursor {
+	if pxCanvas.showMouse {
+		return desktop.DefaultCursor
+	} else {
+		return desktop.HiddenCursor
+	}
 }
 
 func (pxCanvas *PxCanvas) Bounds() image.Rectangle {
