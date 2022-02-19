@@ -1,9 +1,10 @@
-package api
+package jsonapi
 
 import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"mailinglist/mdb"
@@ -19,6 +20,18 @@ func fromJson(body io.Reader, target interface{}) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(body)
 	json.Unmarshal(buf.Bytes(), &target)
+}
+
+func returnErr(w http.ResponseWriter, err error, code int) {
+	returnJson(w, func() (interface{}, error) {
+		errorMessage := struct {
+			Err string
+		}{
+			Err: err.Error(),
+		}
+		w.WriteHeader(code)
+		return errorMessage, nil
+	})
 }
 
 // Writes some data into a ResponseWriter in JSON format.
@@ -57,6 +70,27 @@ func returnJson(w http.ResponseWriter, getData func() (interface{}, error)) {
 	w.Write(dataJson)
 }
 
+// Handler for /email/create
+func CreateEmail(db *sql.DB) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.Method != "POST" {
+			return
+		}
+		entry := mdb.EmailEntry{}
+		fromJson(req.Body, &entry)
+
+		if err := mdb.CreateEmail(db, entry.Email); err != nil {
+			returnErr(w, err, 400)
+			return
+		}
+
+		returnJson(w, func() (interface{}, error) {
+			log.Printf("JSON CreateEmail: %v\n", entry.Email)
+			return mdb.GetEmail(db, entry.Email)
+		})
+	})
+}
+
 // Handler for /email/get
 func GetEmail(db *sql.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -67,6 +101,7 @@ func GetEmail(db *sql.DB) http.Handler {
 		fromJson(req.Body, &entry)
 
 		returnJson(w, func() (interface{}, error) {
+			log.Printf("JSON GetEmail: %v\n", entry.Email)
 			return mdb.GetEmail(db, entry.Email)
 		})
 	})
@@ -75,15 +110,19 @@ func GetEmail(db *sql.DB) http.Handler {
 // Handler for /email/update
 func UpdateEmail(db *sql.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if req.Method != "POST" {
+		if req.Method != "PUT" {
 			return
 		}
 		entry := mdb.EmailEntry{}
 		fromJson(req.Body, &entry)
 
-		mdb.UpdateEmail(db, entry)
+		if err := mdb.UpdateEmail(db, entry); err != nil {
+			returnErr(w, err, 400)
+			return
+		}
 
 		returnJson(w, func() (interface{}, error) {
+			log.Printf("JSON UpdateEmail: %v\n", entry.Email)
 			return mdb.GetEmail(db, entry.Email)
 		})
 	})
@@ -98,49 +137,54 @@ func DeleteEmail(db *sql.DB) http.Handler {
 		entry := mdb.EmailEntry{}
 		fromJson(req.Body, &entry)
 
-		// Important! Always "opt out" the email (instead of delete)
-		// to prevent it from being used in non-transactional messaging.
-		entry.OptOut = true
-		mdb.UpdateEmail(db, entry)
+		if err := mdb.DeleteEmail(db, entry.Email); err != nil {
+			returnErr(w, err, 400)
+			return
+		}
 
 		returnJson(w, func() (interface{}, error) {
+			log.Printf("JSON: DeleteEmail %v\n", entry.Email)
 			return mdb.GetEmail(db, entry.Email)
 		})
 	})
 }
 
 // Handler for /email/get_all
-func GetAllEmails(db *sql.DB) http.Handler {
+func GetEmailBatch(db *sql.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		// only response to GET requests
 		if req.Method != "GET" {
 			return
 		}
 
-		queryOptions := mdb.GetAllEmailsQueryParams{}
+		queryOptions := mdb.GetEmailBatchQueryParams{}
 		fromJson(req.Body, &queryOptions)
 
 		// make sure we have the required fields
 		if queryOptions.Count <= 0 || queryOptions.Page <= 0 {
 			// If we don't have both fields, then return informational message
 			// indicating proper usage of the API.
-			returnJson(w, func() (interface{}, error) {
-				errorMessage := struct {
-					Err     string
-					Example string
-				}{
-					Err:     "Page and Count fields are required and must be > 0",
-					Example: `{"Page":1,"Count":10}`,
-				}
-				w.WriteHeader(400) // 400 == client error
-				return errorMessage, nil
-			})
+			returnErr(w, errors.New("Page and Count fields are required and must be > 0"), 400)
 			return
 		}
 
 		// everything check outs, run the query
 		returnJson(w, func() (interface{}, error) {
-			return mdb.GetAllEmails(db, queryOptions)
+			log.Printf("JSON GetEmailBatch: %v\n", queryOptions)
+			return mdb.GetEmailBatch(db, queryOptions)
 		})
 	})
+}
+
+func Serve(db *sql.DB, bind string) {
+	http.Handle("/email/create", CreateEmail(db))
+	http.Handle("/email/get", GetEmail(db))
+	http.Handle("/email/get_batch", GetEmailBatch(db))
+	http.Handle("/email/update", UpdateEmail(db))
+	http.Handle("/email/delete", DeleteEmail(db))
+	log.Printf("JSON API server listening on %v\n", bind)
+	err := http.ListenAndServe(bind, nil)
+	if err != nil {
+		log.Fatalf("JSON server error: %v", err)
+	}
 }

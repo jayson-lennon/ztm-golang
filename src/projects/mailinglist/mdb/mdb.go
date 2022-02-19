@@ -22,7 +22,7 @@ func TryCreate(db *sql.DB) {
 		CREATE TABLE emails (
 			id           INTEGER PRIMARY KEY,
 			email        TEXT UNIQUE,
-			confirmed_at TIMESTAMP,
+			confirmed_at INTEGER,
 			opt_out      INTEGER
 		);
 	`)
@@ -43,24 +43,37 @@ func TryCreate(db *sql.DB) {
 func emailEntryFromRow(row *sql.Rows) (*EmailEntry, error) {
 	var id int64
 	var email string
-	var confirmedAt *time.Time
+	var confirmedAt int64
 	var optOut bool
 
 	err := row.Scan(&id, &email, &confirmedAt, &optOut)
 
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 		return nil, err
 	}
 
-	return &EmailEntry{Id: id, Email: email, ConfirmedAt: confirmedAt, OptOut: optOut}, nil
+	t := time.Unix(confirmedAt, 0)
+	return &EmailEntry{Id: id, Email: email, ConfirmedAt: &t, OptOut: optOut}, nil
 
+}
+func CreateEmail(db *sql.DB, email string) error {
+	_, err := db.Exec(`INSERT INTO
+		emails(email, confirmed_at, opt_out)
+		VALUES(?, 0, false)`, email)
+
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
 }
 
 func GetEmail(db *sql.DB, email string) (*EmailEntry, error) {
 	rows, err := db.Query(`SELECT id, email, confirmed_at, opt_out FROM emails WHERE email = ?`, email)
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -72,26 +85,40 @@ func GetEmail(db *sql.DB, email string) (*EmailEntry, error) {
 }
 
 func UpdateEmail(db *sql.DB, entry EmailEntry) error {
+	t := entry.ConfirmedAt.Unix()
+
 	_, err := db.Exec(`INSERT INTO
 		emails(email, confirmed_at, opt_out)
 		VALUES(?, ?, ?)
 		ON CONFLICT(email) DO UPDATE SET
 		  confirmed_at=?,
-		  opt_out=?`, entry.Email, entry.ConfirmedAt, entry.OptOut, entry.ConfirmedAt, entry.OptOut)
+		  opt_out=?`, entry.Email, t, entry.OptOut, t, entry.OptOut)
+
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 		return err
 	}
 
 	return nil
 }
 
-type GetAllEmailsQueryParams struct {
+func DeleteEmail(db *sql.DB, email string) error {
+	// Important! Always "opt out" the email (instead of delete)
+	// to prevent it from being used in non-transactional messaging.
+	_, err := db.Exec(`UPDATE emails SET opt_out=true WHERE email=?`, email)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
+type GetEmailBatchQueryParams struct {
 	Page  int
 	Count int
 }
 
-func GetAllEmails(db *sql.DB, params GetAllEmailsQueryParams) ([]EmailEntry, error) {
+func GetEmailBatch(db *sql.DB, params GetEmailBatchQueryParams) ([]EmailEntry, error) {
 	var empty []EmailEntry
 	rows, err := db.Query(`SELECT
 		id, email, confirmed_at, opt_out
@@ -100,7 +127,7 @@ func GetAllEmails(db *sql.DB, params GetAllEmailsQueryParams) ([]EmailEntry, err
 		ORDER BY id ASC
 		LIMIT ? OFFSET ?`, params.Count, (params.Page-1)*params.Count)
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 		return empty, err
 	}
 
