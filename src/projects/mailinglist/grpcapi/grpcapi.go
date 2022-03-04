@@ -4,11 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	"net"
-	"time"
-
 	"mailinglist/mdb"
 	pb "mailinglist/proto"
+	"net"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -37,15 +36,8 @@ func mdbEntryToPbEntry(mdbEntry *mdb.EmailEntry) pb.EmailEntry {
 	}
 }
 
-func (s *MailServer) CreateEmail(ctx context.Context, req *pb.CreateEmailRequest) (*pb.EmailResponse, error) {
-	log.Printf("gRPC CreateEmail: %v\n", req)
-
-	err := mdb.CreateEmail(s.db, req.EmailAddr)
-	if err != nil {
-		return &pb.EmailResponse{}, err
-	}
-
-	entry, err := mdb.GetEmail(s.db, req.EmailAddr)
+func emailResponse(db *sql.DB, email string) (*pb.EmailResponse, error) {
+	entry, err := mdb.GetEmail(db, email)
 	if err != nil {
 		return &pb.EmailResponse{}, err
 	}
@@ -60,18 +52,7 @@ func (s *MailServer) CreateEmail(ctx context.Context, req *pb.CreateEmailRequest
 
 func (s *MailServer) GetEmail(ctx context.Context, req *pb.GetEmailRequest) (*pb.EmailResponse, error) {
 	log.Printf("gRPC GetEmail: %v\n", req)
-
-	entry, err := mdb.GetEmail(s.db, req.EmailAddr)
-	if err != nil {
-		return &pb.EmailResponse{}, err
-	}
-	if entry == nil {
-		return &pb.EmailResponse{}, nil
-	}
-
-	res := mdbEntryToPbEntry(entry)
-
-	return &pb.EmailResponse{EmailEntry: &res}, nil
+	return emailResponse(s.db, req.EmailAddr)
 }
 
 func (s *MailServer) GetEmailBatch(ctx context.Context, req *pb.GetEmailBatchRequest) (*pb.GetEmailBatchResponse, error) {
@@ -86,7 +67,6 @@ func (s *MailServer) GetEmailBatch(ctx context.Context, req *pb.GetEmailBatchReq
 		return &pb.GetEmailBatchResponse{}, err
 	}
 
-	// Convert from mdb to pb
 	pbEntries := make([]*pb.EmailEntry, 0, len(mdbEntries))
 	for i := 0; i < len(mdbEntries); i++ {
 		entry := mdbEntryToPbEntry(&mdbEntries[i])
@@ -94,6 +74,17 @@ func (s *MailServer) GetEmailBatch(ctx context.Context, req *pb.GetEmailBatchReq
 	}
 
 	return &pb.GetEmailBatchResponse{EmailEntries: pbEntries}, nil
+}
+
+func (s *MailServer) CreateEmail(ctx context.Context, req *pb.CreateEmailRequest) (*pb.EmailResponse, error) {
+	log.Printf("gRPC CreateEmail: %v\n", req)
+
+	err := mdb.CreateEmail(s.db, req.EmailAddr)
+	if err != nil {
+		return &pb.EmailResponse{}, err
+	}
+
+	return emailResponse(s.db, req.EmailAddr)
 }
 
 func (s *MailServer) UpdateEmail(ctx context.Context, req *pb.UpdateEmailRequest) (*pb.EmailResponse, error) {
@@ -106,17 +97,7 @@ func (s *MailServer) UpdateEmail(ctx context.Context, req *pb.UpdateEmailRequest
 		return &pb.EmailResponse{}, err
 	}
 
-	updated, err := mdb.GetEmail(s.db, req.EmailEntry.Email)
-	if err != nil {
-		return &pb.EmailResponse{}, err
-	}
-	if updated == nil {
-		return &pb.EmailResponse{}, nil
-	}
-
-	res := mdbEntryToPbEntry(updated)
-
-	return &pb.EmailResponse{EmailEntry: &res}, nil
+	return emailResponse(s.db, entry.Email)
 }
 
 func (s *MailServer) DeleteEmail(ctx context.Context, req *pb.DeleteEmailRequest) (*pb.EmailResponse, error) {
@@ -127,23 +108,13 @@ func (s *MailServer) DeleteEmail(ctx context.Context, req *pb.DeleteEmailRequest
 		return &pb.EmailResponse{}, err
 	}
 
-	updated, err := mdb.GetEmail(s.db, req.EmailAddr)
-	if err != nil {
-		return &pb.EmailResponse{}, err
-	}
-	if updated == nil {
-		return &pb.EmailResponse{}, nil
-	}
-
-	res := mdbEntryToPbEntry(updated)
-
-	return &pb.EmailResponse{EmailEntry: &res}, nil
+	return emailResponse(s.db, req.EmailAddr)
 }
 
 func Serve(db *sql.DB, bind string) {
 	listener, err := net.Listen("tcp", bind)
 	if err != nil {
-		log.Fatalf("gPRC server error: failure to bind %v\n", bind)
+		log.Fatalf("gRPC server error: failure to bind %v\n", bind)
 	}
 
 	grpcServer := grpc.NewServer()

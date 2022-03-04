@@ -11,7 +11,10 @@ import (
 	"github.com/alexflint/go-arg"
 )
 
+<<<<<<< HEAD
 // Flags that may be passed to the program
+=======
+>>>>>>> demo
 var args struct {
 	DbPath   string `arg:"env:MAILINGLIST_DB"`
 	BindJson string `arg:"env:MAILINGLIST_BIND_JSON"`
@@ -21,7 +24,10 @@ var args struct {
 func main() {
 	arg.MustParse(&args)
 
+<<<<<<< HEAD
 	// Defaults if none provided
+=======
+>>>>>>> demo
 	if args.DbPath == "" {
 		args.DbPath = "list.db"
 	}
@@ -39,7 +45,10 @@ func main() {
 	}
 	defer db.Close()
 
+<<<<<<< HEAD
 	// Try to create database if it doesn't exist.
+=======
+>>>>>>> demo
 	mdb.TryCreate(db)
 
 	var wg sync.WaitGroup
@@ -53,11 +62,18 @@ func main() {
 
 	wg.Add(1)
 	go func() {
+<<<<<<< HEAD
 		log.Printf("starting gRPC server...\n")
+=======
+		log.Printf("starting gRPC API server...\n")
+>>>>>>> demo
 		grpcapi.Serve(db, args.BindGrpc)
 		wg.Done()
 	}()
 
 	wg.Wait()
+<<<<<<< HEAD
 
+=======
+>>>>>>> demo
 }
