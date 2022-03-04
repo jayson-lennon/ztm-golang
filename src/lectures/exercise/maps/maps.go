@@ -1,19 +1,22 @@
 //--Summary:
-//  Write a program to display server status.
+//  Create a program to display server status. The server statuses are
+//  defined as constants, and the servers are represented as strings
+//  in the `servers` slice.
 //
 //--Requirements:
-//* Create a function to print server status, including:
-//  - Number of servers
-//  - Number of servers for each status (Online, Offline, Maintenance, Retired)
-//* Store the existing slice of servers in a map
-//* Default all of the servers to `Online`
-//* Perform the following status changes and display server info:
-//  - display server info
-//  - change `darkstar` to `Retired`
-//  - change `aiur` to `Offline`
-//  - display server info
-//  - change all servers to `Maintenance`
-//  - display server info
+//* Create a function to print server status displaying:
+//  - number of servers
+//  - number of servers for each status (Online, Offline, Maintenance, Retired)
+//* Create a map using the server names as the key and the server status
+//  as the value
+//* Set all of the server statuses to `Online` when creating the map
+//* After creating the map, perform the following actions:
+//  - call display server info function
+//  - change server status of `darkstar` to `Retired`
+//  - change server status of `aiur` to `Offline`
+//  - call display server info function
+//  - change server status of all servers to `Maintenance`
+//  - call display server info function
 
 package main
 
@@ -26,7 +29,7 @@ const (
 	Retired     = 3
 )
 
-//* Create a function to print server status, including:
+//* Create a function to print server status displaying:
 func printServerStatus(servers map[string]int) {
 	//  - Number of servers
 	fmt.Println("\nThere are", len(servers), "servers")
@@ -57,31 +60,32 @@ func printServerStatus(servers map[string]int) {
 func main() {
 	servers := []string{"darkstar", "aiur", "omicron", "w359", "baseline"}
 
-	//* Store the existing slice of servers in a map
+	//* Create a map using the server names as the key and the server status
+	//  as the value
 	serverStatus := make(map[string]int)
-	//* Default all of the servers to `Online`
+	//* Set all of the server statuses to `Online` when creating the map
 	for _, server := range servers {
 		serverStatus[server] = Online
 	}
 
-	//* Perform the following status changes and display server info:
-	//  - display server info
+	//* After creating the map, perform the following actions:
+	//  - call display server info function
 	printServerStatus(serverStatus)
 
-	//  - change `darkstar` to `Retired`
+	//  - change server status of `darkstar` to `Retired`
 	serverStatus["darkstar"] = Retired
-	//  - change `aiur` to `Offline`
+	//  - change server status `aiur` to `Offline`
 	serverStatus["aiur"] = Offline
 
-	//  - display server info
+	//  - call display server info function
 	printServerStatus(serverStatus)
 
-	//  - change all servers to `Maintenance`
+	//  - change server status all servers to `Maintenance`
 	for server, status := range serverStatus {
 		if status == Online {
 			serverStatus[server] = Maintenance
 		}
 	}
-	//  - display server info
+	//  - call display server info function
 	printServerStatus(serverStatus)
 }
