@@ -64,10 +64,6 @@ func CreateEmail(db *sql.DB) http.Handler {
 		if req.Method != "POST" {
 			return
 		}
-<<<<<<< HEAD
-=======
-
->>>>>>> demo
 		entry := mdb.EmailEntry{}
 		fromJson(req.Body, &entry)
 
