@@ -15,8 +15,11 @@
 
 package main
 
-import "fmt"
-import "constraints"
+import (
+	"fmt"
+
+	"golang.org/x/exp/constraints"
+)
 
 type Distance int32
 type Velocity float64
