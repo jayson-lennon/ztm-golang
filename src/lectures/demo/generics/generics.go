@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 const (
-	Low    = iota
+	Low = iota
 	Medium
 	High
 )

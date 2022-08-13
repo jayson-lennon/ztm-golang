@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type ControlMsg int
 
@@ -29,8 +31,6 @@ func doubler(jobs, results chan Job, control chan ControlMsg) {
 			}
 		case job := <-jobs:
 			results <- Job{data: job.data, result: job.data * 2}
-		default:
-			time.Sleep(50 * time.Millisecond)
 		}
 	}
 }
