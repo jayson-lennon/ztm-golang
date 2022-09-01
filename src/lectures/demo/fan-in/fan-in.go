@@ -1,5 +1,8 @@
 package main
 
+// We are starting with the same code from the
+// `pipeline` demo.
+
 import (
 	"bytes"
 	"encoding/base64"
