@@ -34,7 +34,7 @@ export const options = {
 
   thresholds: {
     http_req_failed: ['rate < 0.01'],
-    http_req_duration: ['p(90) < 100, p(95) < 200, p(99) < 500'],
+    http_req_duration: ['p(90) < 100', 'p(95) < 200', 'p(99) < 500'],
   },
 
   noConnectionReuse: true,
@@ -43,7 +43,7 @@ export const options = {
 
 };
 
-export default function() {
+export default function () {
 
   http.get('http://localhost:8099');
 
