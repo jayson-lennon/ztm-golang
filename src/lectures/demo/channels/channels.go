@@ -8,8 +8,12 @@ import (
 type ControlMsg int
 
 type Job struct {
-	data   int
+	data int
+}
+
+type Result struct {
 	result int
+	job    Job
 }
 
 const (
@@ -17,7 +21,7 @@ const (
 	ExitOk
 )
 
-func doubler(jobs, results chan Job, control chan ControlMsg) {
+func doubler(jobs <-chan Job, results chan<- Result, control chan ControlMsg) {
 	for {
 		select {
 		case msg := <-control:
@@ -30,20 +34,20 @@ func doubler(jobs, results chan Job, control chan ControlMsg) {
 				panic("Unhandled control message")
 			}
 		case job := <-jobs:
-			results <- Job{data: job.data, result: job.data * 2}
+			results <- Result{result: job.data * 2, job: job}
 		}
 	}
 }
 
 func main() {
 	jobs := make(chan Job, 50)
-	results := make(chan Job, 50)
+	results := make(chan Result, 50)
 	control := make(chan ControlMsg)
 
 	go doubler(jobs, results, control)
 
 	for i := 0; i < 30; i++ {
-		jobs <- Job{i, 0}
+		jobs <- Job{i}
 	}
 
 	for {
