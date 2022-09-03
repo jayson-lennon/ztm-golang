@@ -1,8 +1,5 @@
 package main
 
-// We are starting with the same code from
-// the `fan-in` demo.
-
 import (
 	"bytes"
 	"encoding/base64"
@@ -14,7 +11,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/chai2010/webp"
 	"github.com/google/uuid"
@@ -75,72 +71,11 @@ func saveToDisk(imgBuf bytes.Buffer) string {
 	return filename
 }
 
-func fanIn[T any](channels ...<-chan T) <-chan T {
-	var wg sync.WaitGroup
-
-	// output channel
-	out := make(chan T)
-
-	// we will be spawning a goroutine for each channel,
-	// so we need to add the apropriate count to the
-	// wait group
-	wg.Add(len(channels))
-
-	for _, ch := range channels {
-		// spawn a goroutine for each channel
-		go func(in <-chan T) {
-			// keep reading from the input channel until
-			// we can no longer read items
-			for i := range in {
-				// place the items into the output channel
-				out <- i
-			}
-
-			wg.Done()
-
-		}(ch)
-	}
-
-	go func() {
-		wg.Wait()
-		// close the output channel after all items
-		// have been placed into it by the previously
-		// spawned goroutines
-		close(out)
-	}()
-
-	// immediately return the merged channel while
-	// the goroutines populate it with information
-	return out
-}
-
 func main() {
 	base64Images := makeWork(img1, img2, img3)
-
-	// each one of these stages will operate with multiple goroutines,
-	// taking advantage of availalbe CPU cores
-
-	// stage 1:
-
-	// multiple pipelines (channels + goroutines)
-	rawImages1 := pipeline(base64Images, base64ToRawImage)
-	rawImages2 := pipeline(base64Images, base64ToRawImage)
-	rawImages3 := pipeline(base64Images, base64ToRawImage)
-	// merge them into one channel
-	rawImages := fanIn(rawImages1, rawImages2, rawImages3)
-
-	// stage 2:
-	webpImages1 := pipeline(rawImages, encodeToWebp)
-	webpImages2 := pipeline(rawImages, encodeToWebp)
-	webpImages3 := pipeline(rawImages, encodeToWebp)
-	webpImages := fanIn(webpImages1, webpImages2, webpImages3)
-
-	// stage 3:
-	filenames1 := pipeline(webpImages, saveToDisk)
-	filenames2 := pipeline(webpImages, saveToDisk)
-	filenames3 := pipeline(webpImages, saveToDisk)
-	filenames := fanIn(filenames1, filenames2, filenames3)
-
+	rawImages := pipeline(base64Images, base64ToRawImage)
+	webpImages := pipeline(rawImages, encodeToWebp)
+	filenames := pipeline(webpImages, saveToDisk)
 	for name := range filenames {
 		fmt.Println(name)
 	}
