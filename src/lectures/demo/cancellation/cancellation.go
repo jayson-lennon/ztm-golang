@@ -11,7 +11,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/chai2010/webp"
 	"github.com/google/uuid"
@@ -36,17 +35,14 @@ func makeWork(base64Images ...string) <-chan string {
 	return out
 }
 
-func pipeline[I any, O any](done <-chan struct{}, input <-chan I, process func(I) O) <-chan O {
+func pipeline[I any, O any](quit <-chan struct{}, input <-chan I, process func(I) O) <-chan O {
 	out := make(chan O)
 	go func() {
-		// defer the `close` since we will be returning when the `done` channel closes
 		defer close(out)
 		for in := range input {
 			select {
-			// process the pipeline item
 			case out <- process(in):
-				// abort further processing
-			case <-done:
+			case <-quit:
 				return
 			}
 		}
@@ -79,84 +75,17 @@ func saveToDisk(imgBuf bytes.Buffer) string {
 	return filename
 }
 
-func fanIn[T any](done <-chan struct{}, channels ...<-chan T) <-chan T {
-	var wg sync.WaitGroup
-
-	// output channel
-	out := make(chan T)
-
-	// we will be spawning a goroutine for each channel,
-	// so we need to add the apropriate count to the
-	// wait group
-	wg.Add(len(channels))
-
-	for _, ch := range channels {
-		// spawn a goroutine for each channel
-		go func(in <-chan T) {
-			// defer the waitgroup call, since we will be returning as soon
-			// as the `done` channel closes
-			defer wg.Done()
-			// keep reading from the input channel until
-			// we can no longer read items
-			for i := range in {
-				select {
-				// merge the input
-				case out <- i:
-					// `done` channel closed: signal to stop processing
-				case <-done:
-					return
-				}
-			}
-		}(ch)
-	}
-
-	go func() {
-		wg.Wait()
-		// close the output channel after all items
-		// have been placed into it by the previously
-		// spawned goroutines
-		close(out)
-	}()
-
-	// immediately return the merged channel while
-	// the goroutines populate it with information
-	return out
-}
-
 func main() {
 	base64Images := makeWork(img1, img2, img3)
 
-	// whenever the `done` channel closes, all stages
-	// of the pipeline will exit
-	done := make(chan struct{})
-	// defer the `close` call, so any remaining goroutines abort once
-	// `main` finishes
-	defer close(done)
+	quit := make(chan struct{})
+	var q struct{}
 
-	// each one of these stages will operate with multiple goroutines,
-	// taking advantage of availalbe CPU cores
+	rawImages := pipeline(quit, base64Images, base64ToRawImage)
+	webpImages := pipeline(quit, rawImages, encodeToWebp)
+	quit <- q
 
-	// stage 1:
-
-	// multiple pipelines (channels + goroutines)
-	rawImages1 := pipeline(done, base64Images, base64ToRawImage)
-	rawImages2 := pipeline(done, base64Images, base64ToRawImage)
-	rawImages3 := pipeline(done, base64Images, base64ToRawImage)
-	// merge them into one channel
-	rawImages := fanIn(done, rawImages1, rawImages2, rawImages3)
-
-	// stage 2:
-	webpImages1 := pipeline(done, rawImages, encodeToWebp)
-	webpImages2 := pipeline(done, rawImages, encodeToWebp)
-	webpImages3 := pipeline(done, rawImages, encodeToWebp)
-	webpImages := fanIn(done, webpImages1, webpImages2, webpImages3)
-
-	// stage 3:
-	filenames1 := pipeline(done, webpImages, saveToDisk)
-	filenames2 := pipeline(done, webpImages, saveToDisk)
-	filenames3 := pipeline(done, webpImages, saveToDisk)
-	filenames := fanIn(done, filenames1, filenames2, filenames3)
-
+	filenames := pipeline(quit, webpImages, saveToDisk)
 	for name := range filenames {
 		fmt.Println(name)
 	}
