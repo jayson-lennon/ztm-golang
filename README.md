@@ -21,4 +21,4 @@ You can then execute `go run ./pixl` to run the project.
 ### Pixl Prerequisites
 The Pixl project requires a working installation of `gcc`.
 Installation instructions for various operating systems are covered in the course.
-`gcc` is a widely available tool, so if your operating system is _not_ detailed in the course (or if you are having trouble), please ping `Jayson#6730` in Discord for installation assistance or ask in `#golang` or `#helpme`.
+`gcc` is a widely available tool, so if your operating system is _not_ detailed in the course (or if you are having trouble), please ping `Jayson#6730` in Discord for installation assistance or ask in `#go` or `#helpme`.
