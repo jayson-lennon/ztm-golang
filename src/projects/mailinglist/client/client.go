@@ -60,12 +60,13 @@ func getEmailBatch(client pb.MailingListServiceClient, count int, page int) {
 	}
 }
 
-func updateEmail(client pb.MailingListServiceClient, entry pb.EmailEntry) *pb.EmailEntry {
+func updateEmail(client pb.MailingListServiceClient, entry *pb.EmailEntry) *pb.EmailEntry {
 	log.Println("update email")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	res, err := client.UpdateEmail(ctx, &pb.UpdateEmailRequest{EmailEntry: &entry})
+	rq := pb.UpdateEmailRequest{EmailEntry: entry}
+	res, err := client.UpdateEmail(ctx, &rq)
 	logResponse(res, err)
 
 	return res.EmailEntry
