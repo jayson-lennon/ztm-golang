@@ -25,7 +25,12 @@ func printSrvSts(servermap map[string]int) {
 	for _, srvSts := range servermap {
 		serverStat[srvSts]++
 	}
-	fmt.Println("Servers status are:", serverStat)
+	fmt.Println(serverStat[0], "Servers are online")
+	fmt.Println(serverStat[1], "Servers are Offline")
+	fmt.Println(serverStat[2], "Servers are Maintenance")
+	fmt.Println(serverStat[3], "Servers are Retired")
+
+	fmt.Println()
 
 }
 
