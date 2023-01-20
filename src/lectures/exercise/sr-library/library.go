@@ -19,8 +19,36 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
+
+type Book struct {
+	name         string
+	checkout     bool
+	checkouttime string
+	returntime   string
+}
+type Member struct {
+	name string
+	book Book
+}
 
 func main() {
-
+	p := fmt.Println
+	then := time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+	p(then)
+	book1 := Book{}
+	book2 := Book{}
+	book3 := Book{}
+	john := Member{"John", book1}
+	lib := []Book{book1, book2, book3}
+	book1.name = "book1"
+	book1.checkout = true
+	p(lib)
+	p(book1)
+	p(book2)
+	mems := []Member{john}
+	p(mems)
 }
