@@ -35,6 +35,48 @@ type Member struct {
 	book Book
 }
 
+func checkout(book *Book) {
+	book.checkout = true
+}
+func checkin(book *Book) {
+	book.checkout = false
+}
+
+func printbook(book Book) {
+	fmt.Println(book.name)
+	fmt.Println(book.checkout)
+
+}
+
+func printamem(mem Member) {
+	fmt.Println(mem.name)
+	fmt.Println(mem.book)
+
+}
+func printLib(lib []Book) {
+	fmt.Println()
+	fmt.Println("printnig library!")
+	for i := 0; i < len(lib); i++ {
+		element := lib[i]
+		printbook(element)
+	}
+	fmt.Println("Library Printed!")
+	fmt.Println()
+
+}
+
+func printMem(mem []Member) {
+	fmt.Println()
+	fmt.Println("printnig members!")
+	for i := 0; i < len(mem); i++ {
+		element := mem[i]
+
+		printamem(element)
+	}
+	fmt.Println("Mems Printed!")
+	fmt.Println()
+
+}
 func main() {
 	p := fmt.Println
 	then := time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
@@ -43,12 +85,15 @@ func main() {
 	book2 := Book{}
 	book3 := Book{}
 	john := Member{"John", book1}
-	lib := []Book{book1, book2, book3}
+
 	book1.name = "book1"
+	book2.name = "book2"
+	book3.name = "book3"
 	book1.checkout = true
-	p(lib)
-	p(book1)
-	p(book2)
+	lib := []Book{book1, book2, book3}
+	printLib(lib)
+	printbook(book1)
+	printbook(book2)
 	mems := []Member{john}
-	p(mems)
+	printMem(mems)
 }
