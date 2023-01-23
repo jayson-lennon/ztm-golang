@@ -16,10 +16,10 @@ package main
 
 import "fmt"
 
-//* Implement a player having the following statistics:
-//  - Health, Max Health
-//  - Energy, Max Energy
-//  - Name
+// * Implement a player having the following statistics:
+//   - Health, Max Health
+//   - Energy, Max Energy
+//   - Name
 type Player struct {
 	name              string
 	health, maxHealth uint
@@ -35,8 +35,7 @@ func (player *Player) addHealth(amount uint) {
 }
 
 func (player *Player) applyDamage(amount uint) {
-	// overflow check
-	if player.health-amount > player.health {
+	if amount > player.health {
 		player.health = 0
 	} else {
 		player.health -= amount
