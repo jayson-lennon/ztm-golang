@@ -36,7 +36,7 @@ func getWords(line string) []string {
 	return strings.Split(line, " ")
 }
 
-//* Count the total number of letters in any chosen input
+// * Count the total number of letters in any chosen input
 func countLetters(word string) int {
 	letters := 0
 	for _, ch := range word {
@@ -65,10 +65,10 @@ func main() {
 				//* Input analysis must occur per-word, and each word must be analyzed
 				//  within a goroutine
 				go func() {
-					totalLetters.Lock()
 					defer totalLetters.Unlock()
 					defer wg.Done()
 					sum := countLetters(wordCopy)
+					totalLetters.Lock()
 					totalLetters.count += sum
 				}()
 			}
