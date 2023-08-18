@@ -1,6 +1,6 @@
 module mgrep
 
-go 1.17
+go 1.21
 
 require github.com/alexflint/go-arg v1.4.2
 
