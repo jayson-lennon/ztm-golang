@@ -39,7 +39,7 @@ func generateRandIntn(count, min, max int) <-chan int {
 
 func main() {
 	// seed the RNG so we get new numbers each time
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// We are using a global generator. Each generator spawns a new goroutine,
 	// so we should re-use this one throughout our program.
@@ -71,5 +71,4 @@ func main() {
 		}
 		fmt.Println(n)
 	}
-
 }

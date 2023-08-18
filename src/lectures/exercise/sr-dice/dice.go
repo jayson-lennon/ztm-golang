@@ -34,7 +34,7 @@ func roll(sides int) int {
 }
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	//* The program must handle any number of dice, rolls, and sides
 	dice, sides := 2, 12

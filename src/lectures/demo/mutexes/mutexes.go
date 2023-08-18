@@ -26,7 +26,7 @@ func serve(wg *sync.WaitGroup, hits *Hits, iteration int) {
 }
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	var wg sync.WaitGroup
 
