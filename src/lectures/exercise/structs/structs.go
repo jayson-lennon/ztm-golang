@@ -3,7 +3,7 @@
 //  of a rectangle.
 //
 //--Requirements:
-//* Create a rectangle structure containing its coordinates
+//* Create a rectangle structure containing a length and width field
 //* Using functions, calculate the area and perimeter of a rectangle,
 //  - Print the results to the terminal
 //  - The functions must use the rectangle structure as the function parameter
@@ -19,50 +19,37 @@ package main
 
 import "fmt"
 
-type Coordinate struct {
-	x, y int
-}
-
-//* Create a rectangle structure containing its coordinates
+// * Create a rectangle structure containing a length and width field
 type Rectangle struct {
-	a Coordinate // top left
-	b Coordinate // bottom right
+	length int
+	width  int
 }
 
-func width(rect Rectangle) int {
-	return (rect.b.x - rect.a.x)
-}
-
-func length(rect Rectangle) int {
-	return (rect.a.y - rect.b.y)
-}
-
-//* Using functions, calculate the area and perimeter of a rectangle,
-//  - The functions must use the rectangle structure as the function parameter
+// * Using functions, calculate the area and perimeter of a rectangle,
+//   - The functions must use the rectangle structure as the function parameter
 func area(rect Rectangle) int {
-	return length(rect) * width(rect)
+	return rect.length * rect.width
 }
 
 func perimeter(rect Rectangle) int {
-	return (width(rect) * 2) + (length(rect) * 2)
+	return (rect.width * 2) + (rect.length * 2)
 }
 
-//  - Print the results to the terminal
+// - Print the results to the terminal
 func printInfo(rect Rectangle) {
 	fmt.Println("Area is", area(rect))
 	fmt.Println("Perimeter is", perimeter(rect))
 }
 
 func main() {
-	rect := Rectangle{a: Coordinate{0, 7}, b: Coordinate{10, 0}}
+	rect := Rectangle{length: 3, width: 7}
 	//  - Print the results to the terminal
 	printInfo(rect)
 
 	//* After performing the above requirements, double the size
 	//  of the existing rectangle and repeat the calculations
-	rect.a.y *= 2
-	rect.b.x *= 2
+	rect.length *= 2
+	rect.width *= 2
 	//  - Print the new results to the terminal
 	printInfo(rect)
-
 }
