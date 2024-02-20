@@ -2,6 +2,34 @@ package main
 
 import "fmt"
 
-func main() {
+type Preparer interface {
+	PrepareDish()
+}
 
+type Chicken string
+type Salad string
+
+func (c Chicken) PrepareDish() {
+	fmt.Println("fry chicken")
+}
+
+func (s Salad) PrepareDish() {
+	fmt.Println("mix salad")
+	fmt.Println("add chicken")
+	fmt.Println("add dressing")
+}
+
+func PrepareDishes(dishes []Preparer) {
+	fmt.Println("Prepare dishes:")
+	for i := 0; i < len(dishes); i++ {
+		dish := dishes[i]
+		fmt.Printf("--Dish: %v--\n", dish)
+		dish.PrepareDish()
+	}
+	fmt.Println()
+}
+
+func main() {
+	dishes := []Preparer{Chicken("Chicken wings"), Salad("Ceasar with Chicken")}
+	PrepareDishes(dishes)
 }
