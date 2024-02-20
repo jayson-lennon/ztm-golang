@@ -1,6 +1,6 @@
 module keiko
 
-go 1.19
+go 1.21
 
 require (
 	github.com/chai2010/webp v1.1.1
