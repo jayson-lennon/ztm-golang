@@ -15,4 +15,18 @@ package main
 import "fmt"
 
 func main() {
+	for i := 1; i <= 50; i++ {
+		divideBy3 := i%3 == 0
+		divideBy5 := i%5 == 0
+
+		if divideBy3 && divideBy5 {
+			fmt.Println("Fizz Buzz:", i)
+		} else if divideBy3 {
+			fmt.Println("Fizz:", i)
+		} else if divideBy5 {
+			fmt.Println("Buzz:", i)
+		} else {
+			fmt.Println(i)
+		}
+	}
 }
