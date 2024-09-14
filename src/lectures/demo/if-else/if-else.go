@@ -10,3 +10,4 @@ func average(a, b, c int) float32 {
 func main() {
 
 }
+

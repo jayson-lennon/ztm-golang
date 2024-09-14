@@ -13,3 +13,4 @@ func wait() {
 func main() {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 }
+

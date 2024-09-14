@@ -20,3 +20,4 @@ type Part string
 
 func main() {
 }
+
