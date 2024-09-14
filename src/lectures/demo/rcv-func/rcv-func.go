@@ -34,3 +34,4 @@ func main() {
 	lot.vacateSpace(2)
 	fmt.Println("After vacate:", lot)
 }
+

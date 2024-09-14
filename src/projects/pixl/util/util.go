@@ -15,3 +15,4 @@ func GetImageColors(img image.Image) map[color.Color]struct{} {
 	}
 	return colors
 }
+

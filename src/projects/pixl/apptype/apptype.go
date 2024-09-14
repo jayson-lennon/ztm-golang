@@ -30,3 +30,4 @@ type Brushable interface {
 	SetColor(c color.Color, x, y int)
 	MouseToCanvasXY(ev *desktop.MouseEvent) (*int, *int)
 }
+

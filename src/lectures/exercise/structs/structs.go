@@ -53,3 +53,4 @@ func main() {
 	//  - Print the new results to the terminal
 	printInfo(rect)
 }
+

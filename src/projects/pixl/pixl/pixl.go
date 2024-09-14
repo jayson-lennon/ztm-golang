@@ -41,3 +41,4 @@ func main() {
 
 	appInit.PixlWindow.ShowAndRun()
 }
+

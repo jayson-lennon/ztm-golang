@@ -46,3 +46,4 @@ func main() {
 
 	fmt.Printf("\ntotal hits = %d\n", totalHits)
 }
+

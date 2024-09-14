@@ -42,3 +42,4 @@ func main() {
 	fmt.Println(bus.FrontSeat.Name, "is in the front seat")
 
 }
+

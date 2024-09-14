@@ -38,3 +38,4 @@ func TestNext(t *testing.T) {
 		t.Errorf("should not be any more items in queue, got: %v", item)
 	}
 }
+

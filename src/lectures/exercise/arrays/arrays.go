@@ -61,3 +61,4 @@ func main() {
 
 	printStats(shoppingList)
 }
+

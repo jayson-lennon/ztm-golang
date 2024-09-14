@@ -81,3 +81,4 @@ func main() {
 	fmt.Printf("Average temp: %v\n", dash.AverageCpuTemp())
 	fmt.Printf("Average memory usage: %v\n", dash.AverageMemoryUsage())
 }
+

@@ -20,3 +20,4 @@ func main() {
 	time.Sleep(100 * time.Millisecond)
 	fmt.Printf("After: %c\n", capitalized)
 }
+

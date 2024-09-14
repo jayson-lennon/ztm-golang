@@ -74,3 +74,4 @@ func main() {
 	// implement both Conveyor and Shipper can be automated
 	// automate(&ToxicWaste{300}) // Won't work!
 }
+

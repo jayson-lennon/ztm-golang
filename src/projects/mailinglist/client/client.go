@@ -110,3 +110,4 @@ func main() {
 	getEmailBatch(client, 3, 2)
 	getEmailBatch(client, 3, 3)
 }
+

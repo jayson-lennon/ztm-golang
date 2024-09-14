@@ -69,3 +69,4 @@ func main() {
 	checkout(items)
 	fmt.Println(items)
 }
+

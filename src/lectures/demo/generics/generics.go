@@ -52,3 +52,4 @@ func main() {
 	fmt.Println(queue.Next())
 	fmt.Println(queue.Next())
 }
+

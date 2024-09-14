@@ -60,3 +60,4 @@ func TestEnergy(t *testing.T) {
 	}
 
 }
+

@@ -26,3 +26,4 @@ func (q *Queue) Next() (int, bool) {
 		return 0, false
 	}
 }
+

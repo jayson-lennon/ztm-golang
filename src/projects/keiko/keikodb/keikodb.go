@@ -53,3 +53,4 @@ func IncrementHitCount(db *sql.DB, name string) error {
 
 	return nil
 }
+

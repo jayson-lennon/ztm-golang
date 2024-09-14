@@ -87,3 +87,4 @@ func main() {
 	//  - Print the grand total to the terminal
 	fmt.Println(sum)
 }
+

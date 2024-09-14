@@ -76,3 +76,4 @@ func main() {
 	player.consumeEnergy(20)
 	player.addEnergy(10)
 }
+

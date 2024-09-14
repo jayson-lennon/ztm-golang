@@ -36,3 +36,4 @@ func main() {
 
 	checkCleanliness(rooms)
 }
+

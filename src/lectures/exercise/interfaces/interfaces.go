@@ -91,3 +91,4 @@ func main() {
 	sendToLift(truck)
 	sendToLift(motorcycle)
 }
+
